@@ -1,0 +1,80 @@
+# ==============================================================================
+# Antigravity AI Artifacts
+# ==============================================================================
+.gemini/
+.antigravity/
+.agy/
+brain/
+skills/
+
+# ==============================================================================
+# Python & Virtual Environments
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ==============================================================================
+# Ansible Cache & Retry Files
+# ==============================================================================
+*.retry
+.ansible/
+ansible-vault-password.txt
+
+# ==============================================================================
+# Secrets, Keys & Environment Variables
+# ==============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.kubeconfig
+secrets/
+credentials.json
+id_rsa
+id_rsa.pub
+
+# ==============================================================================
+# Operating System & IDE Clutter
+# ==============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ==============================================================================
+# Logs & Temporary Files (Preserve project plan)
+# ==============================================================================
+*.log
+logs/
+tmp/*
+!tmp/project-plan.md
