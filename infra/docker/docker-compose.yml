@@ -1,0 +1,56 @@
+# ==============================================================================
+# Docker Compose: infra/docker/docker-compose.yml
+# Purpose: Provision 3 static Ubuntu nodes on private subnet 172.20.0.0/16
+# ==============================================================================
+
+services:
+  node-master:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: node-master
+    hostname: node-master
+    privileged: true
+    volumes:
+      - ${HOME}/.ssh/id_rsa.pub:/home/ubuntu/.ssh/authorized_keys:ro
+    networks:
+      homelab-net:
+        ipv4_address: 172.20.0.10
+    restart: unless-stopped
+
+  node-worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: node-worker-1
+    hostname: node-worker-1
+    privileged: true
+    volumes:
+      - ${HOME}/.ssh/id_rsa.pub:/home/ubuntu/.ssh/authorized_keys:ro
+    networks:
+      homelab-net:
+        ipv4_address: 172.20.0.11
+    restart: unless-stopped
+
+  node-worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: node-worker-2
+    hostname: node-worker-2
+    privileged: true
+    volumes:
+      - ${HOME}/.ssh/id_rsa.pub:/home/ubuntu/.ssh/authorized_keys:ro
+    networks:
+      homelab-net:
+        ipv4_address: 172.20.0.12
+    restart: unless-stopped
+
+networks:
+  homelab-net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

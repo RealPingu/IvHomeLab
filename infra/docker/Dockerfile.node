@@ -1,0 +1,39 @@
+# ==============================================================================
+# Dockerfile: infra/docker/Dockerfile.node
+# Purpose: Base Ubuntu 22.04 image equipped with SSH server & sudo for Ansible
+# ==============================================================================
+
+FROM ubuntu:22.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1. Install base utilities, Python (required by Ansible), and OpenSSH server
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssh-server \
+    sudo \
+    curl \
+    iproute2 \
+    iputils-ping \
+    python3 \
+    python3-apt \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. Configure SSH daemon directory
+RUN mkdir -p /var/run/sshd
+
+# 3. Create 'ubuntu' user with passwordless sudo access (matches standard cloud VMs)
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 ubuntu && \
+    echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# 4. Prepare SSH authorized_keys directory for the ubuntu user
+RUN mkdir -p /home/ubuntu/.ssh && \
+    chmod 700 /home/ubuntu/.ssh && \
+    chown -R ubuntu:root /home/ubuntu/.ssh
+
+# Expose standard SSH port
+EXPOSE 22
+
+# Start SSH daemon in the foreground
+CMD ["/usr/sbin/sshd", "-D"]
