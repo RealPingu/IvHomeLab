@@ -1,0 +1,74 @@
+# ==============================================================================
+# Ansible Playbook: ansible/site.yml
+# Purpose: Bootstrap a 3-node K3s Kubernetes cluster across master and workers
+# ==============================================================================
+
+- name: Prepare base dependencies across all cluster nodes
+  hosts: k3s_cluster
+  become: true
+  tasks:
+    - name: Ensure prerequisite packages are installed
+      ansible.builtin.apt:
+        name:
+          - curl
+          - ca-certificates
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+
+- name: Install K3s Control Plane on Master
+  hosts: master
+  become: true
+  tasks:
+    - name: Check if K3s server service is already installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: k3s_server_binary
+
+    - name: Download and install K3s Server
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --write-kubeconfig-mode 644 --node-ip 172.20.0.10 --bind-address 172.20.0.10 --advertise-address 172.20.0.10" sh -
+      when: not k3s_server_binary.stat.exists
+
+    - name: Wait for K3s node token to be generated
+      ansible.builtin.wait_for:
+        path: /var/lib/rancher/k3s/server/node-token
+        state: present
+        timeout: 60
+
+    - name: Read cluster join token from Master
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: node_token_b64
+
+    - name: Store decoded token in play facts
+      ansible.builtin.set_fact:
+        k3s_cluster_token: "{{ node_token_b64.content | b64decode | trim }}"
+
+    - name: Fetch kubeconfig to WSL2 management machine
+      ansible.builtin.fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ../kubeconfig
+        flat: yes
+
+    - name: Update kubeconfig server address to master IP on management machine
+      ansible.builtin.replace:
+        path: ../kubeconfig
+        regexp: '127\.0\.0\.1'
+        replace: '172.20.0.10'
+      delegate_to: localhost
+      become: false
+
+- name: Join Worker Nodes to the K3s Cluster
+  hosts: workers
+  become: true
+  tasks:
+    - name: Check if K3s agent is already installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: k3s_agent_binary
+
+    - name: Join worker node to Master
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | K3S_URL="https://172.20.0.10:6443" K3S_TOKEN="{{ hostvars[groups['master'][0]]['k3s_cluster_token'] }}" sh -
+      when: not k3s_agent_binary.stat.exists

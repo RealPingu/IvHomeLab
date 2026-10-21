@@ -12,7 +12,7 @@ services:
     hostname: node-master
     privileged: true
     volumes:
-      - ${HOME}/.ssh/id_rsa.pub:/home/ubuntu/.ssh/authorized_keys:ro
+      - ./authorized_keys.pub:/home/ubuntu/.ssh/authorized_keys:ro
     networks:
       homelab-net:
         ipv4_address: 172.20.0.10
@@ -26,7 +26,7 @@ services:
     hostname: node-worker-1
     privileged: true
     volumes:
-      - ${HOME}/.ssh/id_rsa.pub:/home/ubuntu/.ssh/authorized_keys:ro
+      -  ./authorized_keys.pub:/home/ubuntu/.ssh/authorized_keys:ro
     networks:
       homelab-net:
         ipv4_address: 172.20.0.11
@@ -40,7 +40,7 @@ services:
     hostname: node-worker-2
     privileged: true
     volumes:
-      - ${HOME}/.ssh/id_rsa.pub:/home/ubuntu/.ssh/authorized_keys:ro
+      - ./authorized_keys.pub:/home/ubuntu/.ssh/authorized_keys:ro
     networks:
       homelab-net:
         ipv4_address: 172.20.0.12

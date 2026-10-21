@@ -59,6 +59,7 @@ secrets/
 credentials.json
 id_rsa
 id_rsa.pub
+*.pub
 
 # ==============================================================================
 # Operating System & IDE Clutter
